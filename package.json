@@ -1,0 +1,9 @@
+{
+  "name": "ethan-fahelandco",
+  "private": true,
+  "type": "module",
+  "description": "Ethan's operations hub for Fahel & Co (staff only, Google sign-in): merged calendar, morning brief detail, inbox signing list.",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
