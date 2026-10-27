@@ -4,6 +4,7 @@
 //                                                               due YYYY-MM-DD (moves it on the calendar; "" clears), note appends to its notes log.
 //                                                               Notes and a moved date survive a reopen; history keeps the last 30 changes.
 //   { op:"add", date, title, note }                             add a diary item on a day
+//   { op:"move", id, date }                                     move a diary item to another day (calendar drag and drop)
 //   { op:"toggle", id }                                         complete or reopen a diary item
 //   { op:"delete", id }                                         remove a diary item
 import crypto from "node:crypto";
@@ -54,6 +55,11 @@ export default async (req) => {
     const title = clean(b.title, 200);
     if (!date || !title) return Response.json({ error: "date and title required" }, { status: 400 });
     items.push({ id: "d" + crypto.randomBytes(6).toString("hex"), date, title, note: clean(b.note, 1000), done: false, by: u.email, at });
+  } else if (b.op === "move") {
+    const i = items.findIndex(x => x.id === b.id);
+    if (i < 0) return Response.json({ error: "not found" }, { status: 404 });
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(b.date || "")) return Response.json({ error: "date must be YYYY-MM-DD" }, { status: 400 });
+    items[i].date = b.date; items[i].movedBy = u.email; items[i].movedAt = at;
   } else if (b.op === "toggle" || b.op === "delete") {
     const i = items.findIndex(x => x.id === b.id);
     if (i < 0) return Response.json({ error: "not found" }, { status: 404 });
