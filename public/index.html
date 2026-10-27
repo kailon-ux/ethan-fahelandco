@@ -87,7 +87,7 @@ a{color:inherit}
 .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);border-radius:100px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
 .chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .chip[aria-pressed="false"]{opacity:.45}
-.nav{display:flex;gap:6px;align-items:center}
+.nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .nav .lbl{font-weight:600;min-width:150px;text-align:center}
 .week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
 @media(max-width:900px){.week{grid-template-columns:1fr}}
@@ -172,15 +172,10 @@ details.fold[open]>summary::before{transform:rotate(45deg)}
 .links a span{font-size:12px;color:var(--ink-3)}
 .err{background:var(--bad-soft);color:var(--bad);border-radius:var(--r-s);padding:8px 12px;font-size:13px;margin-top:10px}
 .note{font-size:12.5px;color:var(--ink-3);margin-top:8px}
-/* rooming house licence guide */
-.ref h3{font-size:14px;margin:16px 0 4px}
-.ref h3:first-child{margin-top:0}
-.ref ol,.ref ul{margin:4px 0 0;padding-left:20px;font-size:13.5px}
-.ref li{margin:3px 0}
-.ref p{font-size:13.5px;margin:4px 0}
-table.wording{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:6px}
-table.wording th{background:#000;color:#fff;font-weight:700;text-align:left;padding:5px 8px}
-table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align:top}
+/* drag and drop on the calendar */
+[draggable="true"]{cursor:grab}
+.dragging{opacity:.45}
+.drop-on{outline:2px dashed var(--accent-deep);outline-offset:-2px;background:var(--accent-soft, rgba(47,93,58,.08))}
 </style>
 </head>
 <body>
@@ -203,6 +198,7 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
     <div class="tb-right">
       <div class="tb-actions">
         <a class="ghost" href="https://staff.fahelandco.com/">Staff home</a>
+        <a class="ghost" href="https://claude.ai/artifact/XLqfBzeYscmmKgJLvWUeRv" target="_blank" rel="noopener">Resources &amp; FAQs</a>
         <button class="ghost" id="refresh">Refresh</button>
         <button class="ghost" id="signout">Sign out</button>
       </div>
@@ -233,12 +229,14 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
         <span class="lbl" id="week-lbl"></span>
         <button class="ghost" id="next" aria-label="Next week">&#8250;</button>
         <button class="ghost" id="this-week">This week</button>
+        <button class="solid" id="addnew">+ Add item</button>
       </div>
     </div>
     <div class="week" id="week"></div>
     <details class="fold" id="month-fold"><summary id="month-sum">Show the month</summary><div class="month" id="month"></div></details>
     <details class="fold"><summary id="cycle-sum">Show the Late Rent cycle</summary><div class="card pad" style="margin-top:8px"><ul class="rows" id="cycle"></ul></div></details>
     <details class="fold"><summary id="done-sum">Show completed items</summary><div class="card pad" style="margin-top:8px"><ul class="rows" id="done-list"></ul></div></details>
+    <p class="note">Add your own item with <b>+ Add item</b> or the + on any day; click it to edit, complete or delete it. Drag a brief row, a monday row or one of your own items onto another day to move it. Google Calendar events move in Google Calendar. Moving a monday row changes the date on the hub only.</p>
     <div id="cal-err"></div>
   </section>
 
@@ -246,65 +244,6 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
     <div class="sec-h"><h2>Morning brief</h2><span class="hint" id="brief-hint"></span></div>
     <div class="cards" id="cards"></div>
     <div id="health"></div>
-  </section>
-
-  <section class="sec" id="rooming-sec">
-    <div class="sec-h"><h2>Rooming house licences</h2><span class="hint">How they work and how to handle them</span></div>
-    <div class="card pad ref">
-      <p>Any building rented as a rooming house in Ottawa needs a City of Ottawa business licence (Licensing By-law 2002-189). It is renewed every year, and it belongs to the owner, not to Fahel &amp; Co.</p>
-      <details class="fold"><summary>Show who applies and what Fahel &amp; Co does</summary>
-        <p>The owner or operator of the licensed entity must sign and submit the application or renewal. The City's licensing staff have said a property manager cannot complete it on the owner's behalf. Fahel &amp; Co prepares the package, collects the owner's signature, insurance certificate and cheque, and delivers it. Fahel &amp; Co is listed on the file as agent, but the City also wants the owner's own contact.</p>
-      </details>
-      <details class="fold"><summary>Show the yearly renewal, step by step</summary>
-        <ol>
-          <li>Watch for the City's "Notice of Licence Renewal" for each building, usually in late March. It can go to the owner or a previous manager, so ask owners to forward it.</li>
-          <li>Ask the owner for a cheque payable to the City of Ottawa, for the amount on the notice, drawn on the owner's or property's account.</li>
-          <li>Have the Rooming House Indemnification Form signed by the applicant (an owner, director or shareholder of the owning corporation), with a witness.</li>
-          <li>Get a certificate of insurance from the owner's broker, worded as in the City's checklist below, naming the City as additional insured.</li>
-          <li>Include the agent contact letter (c/o Fahel &amp; Co Inc., 2450 Lancaster Road, Unit 4, Ottawa K1B 5N3, 613-366-0769, info@fahelandco.com) and the owner's own contact name, phone, email and office address.</li>
-          <li>Send the stub from the renewal notice with everything above, plus any change to the licence (such as a new mailing address; a change on the Articles of Incorporation needs supporting documents).</li>
-          <li>Keep copies in the Rooming Licenses folder in Drive and note the date sent. Follow up with the City if nothing comes back within a few weeks.</li>
-        </ol>
-      </details>
-      <details class="fold"><summary>Show what to do when a building is sold or changes hands</summary>
-        <p>The licence does not transfer. When ownership changes, the City terminates it and the new owner must apply for a new licence directly. Start the new owner's application at closing, with the indemnification form, insurance in force from the closing date, and the new owner's contact. Tell the City licensing office who the new owner is so the old file is not chased for renewals.</p>
-      </details>
-      <details class="fold"><summary>Show deadlines, inspections and fines</summary>
-        <ul>
-          <li>Renewal depends on the building meeting property standards, and the City can require a fire inspection. Fix inspection deficiencies before the renewal is due.</li>
-          <li>When the City asks for missing documents or owner information, it gives a deadline. After that it can fine the location, so answer City licensing emails the same week.</li>
-          <li>Zoning decides where a rooming house is allowed at all; see the zoning link below before treating a new building as one.</li>
-        </ul>
-      </details>
-      <details class="fold"><summary>Show where to send it and who to call</summary>
-        <ul>
-          <li>Mail: By-law and Regulatory Services, 735 Industrial Avenue, Ottawa ON K1G 5J1.</li>
-          <li>In person: Business Licensing Centre, 735 Industrial Ave, Monday to Friday 8:30 am to 4:15 pm (entrance on the west side of the building).</li>
-          <li>Help: 613-580-2424 ext. 12735, press 1 for English then option 5.</li>
-          <li>Licensing questions go to By-law and Regulatory Services, not Revenue Services (revenue@ottawa.ca), which only handles water and property tax.</li>
-        </ul>
-      </details>
-      <details class="fold"><summary>Show the City's insurance certificate wording</summary>
-        <table class="wording"><tr><th>Item</th><th>Required</th></tr>
-          <tr><td>Business licence type</td><td>Rooming Houses</td></tr>
-          <tr><td>Class of insurance</td><td>Commercial General Liability, $2 million limit</td></tr>
-          <tr><td>Details</td><td>Trade name, insurer, name and address of insured, address of the insured property, policy number, effective and expiry dates, broker name and phone</td></tr>
-          <tr><td>Additional insured</td><td>City of Ottawa, for all operations, but only with respect to its interest in the operations of the named insured</td></tr>
-          <tr><td>Cancellation</td><td>30 days written notice by registered mail to City of Ottawa, Bylaw &amp; Regulatory Services Branch, 735 Industrial Avenue, 2nd floor, Ottawa K1G 5J1</td></tr>
-        </table>
-      </details>
-      <details class="fold"><summary>Show the forms and links</summary>
-        <ul>
-          <li><a href="https://drive.google.com/drive/folders/1w9N8oOtWgnp-OPuZZjw9Qq6lk7uq1G4C" target="_blank" rel="noopener">Rooming Licenses folder (Drive)</a></li>
-          <li><a href="https://docs.google.com/document/d/1edgEmekjtewMakQ8YKnCsZBJAkINihQyEGuQ4TlFvtc/edit" target="_blank" rel="noopener">Rooming License Renewal, how-to</a></li>
-          <li><a href="https://drive.google.com/file/d/10TvUa0Msvs_A11tXdMzCJl7H8CPoR2MW/view" target="_blank" rel="noopener">Indemnification form (blank)</a></li>
-          <li><a href="https://drive.google.com/file/d/1IqhoPLkI4xuFlgig-SlDgF1AY3Wns0kq/view" target="_blank" rel="noopener">Insurance certificate checklist</a></li>
-          <li><a href="https://docs.google.com/document/d/1v_C-xu6jFqSVAAX0nPEdIuSDQ_2covwgSf12pP4eLoo/edit" target="_blank" rel="noopener">Agent contact letter</a></li>
-          <li><a href="https://ottawa.ca/en/business/business-resources/laws-businesses/licensing-law-no-2002-189/businesses-regulated-licensing-law-no-2002-189" target="_blank" rel="noopener">City of Ottawa, Licensing By-law 2002-189</a></li>
-          <li><a href="https://documents.ottawa.ca/sites/default/files/zoning_bylaw_part5_section132_en.pdf" target="_blank" rel="noopener">City of Ottawa, zoning rules for rooming houses (section 132)</a></li>
-        </ul>
-      </details>
-    </div>
   </section>
 
   <section class="sec">
@@ -330,6 +269,7 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
   ];
   const HOT = new Set(["urgent", "rami"]);
   const LINKS = [
+    ["Operations - Resources & FAQs", "How-tos, LTB forms, rooming licences, utilities, insurance. Searchable.", "https://claude.ai/artifact/XLqfBzeYscmmKgJLvWUeRv"],
     ["Leases, Move-Ins and Rent Roll Audit dashboard", "Urgent issues, unit checks, N8 flags", "https://script.google.com/a/macros/fahelandco.com/s/AKfycbwWSkiLnKLhEnzQQt2HjQtWmwG3gD01VqcvlyhNCQzo2yOunlCB0iLEdVWH95E3kxFHyA/exec"],
     ["Operations meeting notes", "Kailon's running action list", "https://docs.google.com/document/d/1vj-Qxj2542bUNMRszSxNw9PgUi6hr2YxhhS5jBtEgUM/edit"],
     ["Late Rent Cycle Tracker", "monday, this month's 25 steps", "https://fahel.monday.com/boards/18423960533"],
@@ -341,7 +281,6 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
     ["Client Offboarding", "monday", "https://fahel.monday.com/boards/4424443037"],
     ["MASTER Project Tracker", "monday, your projects", "https://fahel.monday.com/boards/18403725633"],
     ["E-Transfer Log", "Google Sheets, deposits by property", "https://docs.google.com/spreadsheets/d/1sUwN8niHnfVyyxuIVpe-o3DUNiivoZtWrbMTSNLUHtI/edit"],
-    ["Fahel Ops Hub (guides)", "LTB forms, utilities, insurance and process guides", "https://claude.ai/artifact/XLqfBzeYscmmKgJLvWUeRv"],
     ["Gmail: To Sign", "Leases and documents waiting on your signature", "https://mail.google.com/mail/u/?authuser=ethan@fahelandco.com#label/To+Sign"],
     ["Gmail: To Review", "Copied for information, no action needed", "https://mail.google.com/mail/u/?authuser=ethan@fahelandco.com#label/To+Review"],
   ];
@@ -401,6 +340,8 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
     for (const d of D.diary || []) out.push({ id: d.id, stream: "mine", date: d.date, title: d.title, sub: d.note, done: d.done, diary: true });
     for (const e of out) {
       const mk = mark(e.id);
+      // A date moved on the hub (drag and drop or Update) wins over monday's date; monday itself is unchanged.
+      if (mk?.due && ["master", "cycle", "projects"].includes(e.stream)) { e.date = mk.due; e.moved = true; }
       if (mk?.status === "done") e.done = true;
       if (mk?.status === "dismissed") e.hidden = true;
       if (!e.done && e.date < today() && ["deadlines", "projects", "cycle", "master"].includes(e.stream) && (e.mine !== false)) e.overdue = true;
@@ -411,7 +352,8 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
 
   function evBtn(e, cls = "ev") {
     const flag = e.overdue || e.needsAction;
-    return `<button class="${cls}${e.done ? " done" : ""}${flag && cls === "ev" ? " flag" : ""}" style="--c:${cssVar(e.stream)}" data-ev="${esc(e.id)}" title="${esc(e.title)}">${cls === "ev" && e.time ? `<span class="t">${esc(e.time)}${e.needsAction ? ", reply owed" : ""}</span>` : ""}${cls === "ev" && e.overdue ? `<span class="t" style="color:var(--bad)">Overdue</span>` : ""}${esc(e.title)}</button>`;
+    const drag = e.kind !== "event" && !e.done;
+    return `<button class="${cls}${e.done ? " done" : ""}${flag && cls === "ev" ? " flag" : ""}" style="--c:${cssVar(e.stream)}" data-ev="${esc(e.id)}"${drag ? ` draggable="true" data-drag="${esc(e.id)}"` : ""} title="${esc(e.title)}${drag ? " (drag to another day to move it)" : ""}">${cls === "ev" && e.time ? `<span class="t">${esc(e.time)}${e.needsAction ? ", reply owed" : ""}</span>` : ""}${cls === "ev" && e.overdue ? `<span class="t" style="color:var(--bad)">Overdue</span>` : ""}${esc(e.title)}</button>`;
   }
 
   function renderCalendar(all) {
@@ -423,7 +365,7 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
     let h = "";
     for (let i = 0; i < 7; i++) {
       const d = addDays(ws, i), evs = days[d] || [];
-      h += `<div class="day${d === t ? " is-today" : ""}${[0, 6].includes(dow(d)) ? " weekend" : ""}"><div class="day-h"><span>${fmtDay(d)}</span><button class="plus" data-add="${d}" aria-label="Add an item on ${fmtDay(d)}">+</button></div><div class="day-b">${evs.map(e => evBtn(e)).join("") || `<span class="empty">Nothing</span>`}</div></div>`;
+      h += `<div data-drop="${d}" class="day${d === t ? " is-today" : ""}${[0, 6].includes(dow(d)) ? " weekend" : ""}"><div class="day-h"><span>${fmtDay(d)}</span><button class="plus" data-add="${d}" aria-label="Add an item on ${fmtDay(d)}">+</button></div><div class="day-b">${evs.map(e => evBtn(e)).join("") || `<span class="empty">Nothing</span>`}</div></div>`;
     }
     $("week").innerHTML = h;
 
@@ -437,7 +379,7 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
       const d = addDays(mStart, i);
       if (i >= 35 && d.slice(5, 7) !== first.slice(5, 7)) break;
       const evs = days[d] || [];
-      m += `<div class="mcell${d.slice(5, 7) !== first.slice(5, 7) ? " out" : ""}${d === t ? " is-today" : ""}"><div class="n"><span>${Number(d.slice(8))}</span><button class="plus" style="border:0;background:none;color:var(--ink-3)" data-add="${d}" aria-label="Add">+</button></div>${evs.slice(0, 4).map(e => evBtn(e, "m")).join("")}${evs.length > 4 ? `<div style="color:var(--ink-3)">+${evs.length - 4} more</div>` : ""}</div>`;
+      m += `<div data-drop="${d}" class="mcell${d.slice(5, 7) !== first.slice(5, 7) ? " out" : ""}${d === t ? " is-today" : ""}"><div class="n"><span>${Number(d.slice(8))}</span><button class="plus" style="border:0;background:none;color:var(--ink-3)" data-add="${d}" aria-label="Add">+</button></div>${evs.slice(0, 4).map(e => evBtn(e, "m")).join("")}${evs.length > 4 ? `<div style="color:var(--ink-3)">+${evs.length - 4} more</div>` : ""}</div>`;
     }
     $("month").innerHTML = m;
 
@@ -598,15 +540,21 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
       <button class="ghost" data-close>Close</button></div>`);
   }
   function addForm(date) {
-    openDrawer(`<div class="eyebrow">New item</div><h3>${fmtLong(date)}</h3><form id="add-form"><input name="title" placeholder="What needs doing" maxlength="200" required><textarea name="note" rows="3" placeholder="Note (optional)" maxlength="1000"></textarea><div class="btns"><button class="solid" type="submit">Add</button><button class="ghost" type="button" data-close>Cancel</button></div></form><div class="note">Items are shared with everyone on the hub.</div>`);
+    openDrawer(`<div class="eyebrow">New item</div><h3>Add to your calendar</h3><form id="add-form"><div class="lbl">What</div><input name="title" placeholder="What needs doing" maxlength="200" required><div class="lbl">Day</div><input type="date" name="date" value="${esc(date)}" required><div class="lbl">Note</div><textarea name="note" rows="3" placeholder="Optional" maxlength="1000"></textarea><div class="btns"><button class="solid" type="submit">Add</button><button class="ghost" type="button" data-close>Cancel</button></div></form><div class="note">Your items are shared with everyone on the hub. Edit, complete or delete them by clicking them on the calendar.</div>`);
     const f = $("add-form"); f.title.focus();
-    f.addEventListener("submit", async ev => { ev.preventDefault(); const r = await post({ op: "add", date, title: f.title.value, note: f.note.value }); if (r) closeDrawer(); });
+    f.addEventListener("submit", async ev => { ev.preventDefault(); if (!f.date.value) return; const r = await post({ op: "add", date: f.date.value, title: f.title.value, note: f.note.value }); if (r) closeDrawer(); });
+  }
+  function editDiary(id) {
+    const d = (D.diary || []).find(x => x.id === id); if (!d) return;
+    openDrawer(`<div class="eyebrow" style="color:${cssVar("mine")}">My item</div><h3>Edit item</h3><form id="edit-form"><div class="lbl">What</div><input name="title" value="${esc(d.title)}" maxlength="200" required><div class="lbl">Day</div><input type="date" name="date" value="${esc(d.date)}" required><div class="lbl">Note</div><textarea name="note" rows="3" maxlength="1000">${esc(d.note || "")}</textarea><div class="btns"><button class="solid" type="submit">Save</button><button class="ghost" type="button" data-toggle="${esc(id)}">${d.done ? "Reopen" : "Mark complete"}</button><button class="ghost" type="button" data-del="${esc(id)}">Delete</button><button class="ghost" type="button" data-close>Cancel</button></div></form>${d.by ? `<div class="note">Added by ${esc(who(d.by))}${d.editedBy ? `, last edited by ${esc(who(d.editedBy))} ${esc(whenShort(d.editedAt))}` : ""}</div>` : ""}`);
+    const f = $("edit-form"); f.title.focus();
+    f.addEventListener("submit", async ev => { ev.preventDefault(); const r = await post({ op: "edit", id, title: f.title.value, date: f.date.value, note: f.note.value }); if (r) closeDrawer(); });
   }
 
   document.addEventListener("click", async e => {
     const t = e.target.closest("[data-ev],[data-add],[data-mark],[data-upd],[data-edit],[data-hide],[data-delnote],[data-toggle],[data-del],[data-stream],[data-reopen]");
     if (!t) return;
-    if (t.dataset.ev) { const ev = entries().find(x => x.id === t.dataset.ev); return ev?.brief || ITEMS()[t.dataset.ev] ? editItem(t.dataset.ev) : showEntry(t.dataset.ev); }
+    if (t.dataset.ev) { const ev = entries().find(x => x.id === t.dataset.ev); if (ev?.diary) return editDiary(t.dataset.ev); return ev?.brief || ITEMS()[t.dataset.ev] ? editItem(t.dataset.ev) : showEntry(t.dataset.ev); }
     if (t.dataset.add) return addForm(t.dataset.add);
     if (t.dataset.stream) { const k = t.dataset.stream; st.on.has(k) ? st.on.delete(k) : st.on.add(k); try { localStorage.setItem("eh_streams", JSON.stringify([...st.on])); } catch (_) {} return render(); }
     if (t.dataset.mark) { await post({ op: "mark", id: t.dataset.mark, status: t.dataset.st }); return closeDrawer(); }
@@ -618,9 +566,26 @@ table.wording td{border-top:1px solid var(--line);padding:5px 8px;vertical-align
     if (t.dataset.toggle) { await post({ op: "toggle", id: t.dataset.toggle }); return closeDrawer(); }
     if (t.dataset.del) { if (confirm("Delete this item?")) { await post({ op: "delete", id: t.dataset.del }); closeDrawer(); } }
   });
+  // Drag and drop: drop a brief row, a monday row or one of your own items on another day to move it.
+  // Google Calendar events cannot be moved from here (change those in Google Calendar).
+  let dragId = null;
+  document.addEventListener("dragstart", e => { const t = e.target.closest?.("[data-drag]"); if (!t) return; dragId = t.dataset.drag; e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", dragId); } catch (_) {} t.classList.add("dragging"); });
+  document.addEventListener("dragend", () => { dragId = null; document.querySelectorAll(".dragging,.drop-on").forEach(x => x.classList.remove("dragging", "drop-on")); });
+  document.addEventListener("dragover", e => { if (!dragId) return; const c = e.target.closest?.("[data-drop]"); if (!c) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; document.querySelectorAll(".drop-on").forEach(x => x !== c && x.classList.remove("drop-on")); c.classList.add("drop-on"); });
+  document.addEventListener("drop", async e => {
+    const c = e.target.closest?.("[data-drop]"); if (!c || !dragId) return;
+    e.preventDefault();
+    const id = dragId, date = c.dataset.drop; dragId = null;
+    c.classList.remove("drop-on");
+    const ev = entries().find(x => x.id === id);
+    if (!ev || ev.date === date) return;
+    if (ev.diary) await post({ op: "move", id, date });
+    else await post({ op: "update", id, due: date });
+  });
   $("prev").onclick = () => { st.weekStart = addDays(st.weekStart, -7); render(); };
   $("next").onclick = () => { st.weekStart = addDays(st.weekStart, 7); render(); };
   $("this-week").onclick = () => { st.weekStart = mondayOf(today()); render(); };
+  $("addnew").onclick = () => addForm(today());
   $("signout").onclick = () => FCGate.signOut();
 
   async function load(refresh) {
