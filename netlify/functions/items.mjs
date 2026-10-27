@@ -5,6 +5,7 @@
 //                                                               Notes and a moved date survive a reopen; history keeps the last 30 changes.
 //   { op:"add", date, title, note }                             add a diary item on a day
 //   { op:"move", id, date }                                     move a diary item to another day (calendar drag and drop)
+//   { op:"edit", id, title?, note?, date? }                     change a diary item's title, note or day
 //   { op:"toggle", id }                                         complete or reopen a diary item
 //   { op:"delete", id }                                         remove a diary item
 import crypto from "node:crypto";
@@ -60,6 +61,13 @@ export default async (req) => {
     if (i < 0) return Response.json({ error: "not found" }, { status: 404 });
     if (!/^\d{4}-\d{2}-\d{2}$/.test(b.date || "")) return Response.json({ error: "date must be YYYY-MM-DD" }, { status: 400 });
     items[i].date = b.date; items[i].movedBy = u.email; items[i].movedAt = at;
+  } else if (b.op === "edit") {
+    const i = items.findIndex(x => x.id === b.id);
+    if (i < 0) return Response.json({ error: "not found" }, { status: 404 });
+    if (b.title !== undefined) { const t = clean(b.title, 200); if (!t) return Response.json({ error: "title required" }, { status: 400 }); items[i].title = t; }
+    if (b.note !== undefined) items[i].note = clean(b.note, 1000);
+    if (b.date !== undefined) { if (!/^\d{4}-\d{2}-\d{2}$/.test(b.date || "")) return Response.json({ error: "date must be YYYY-MM-DD" }, { status: 400 }); items[i].date = b.date; }
+    items[i].editedBy = u.email; items[i].editedAt = at;
   } else if (b.op === "toggle" || b.op === "delete") {
     const i = items.findIndex(x => x.id === b.id);
     if (i < 0) return Response.json({ error: "not found" }, { status: 404 });
