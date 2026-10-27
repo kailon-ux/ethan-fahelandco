@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F1F5EF">
+<meta name="robots" content="noindex,nofollow">
+<title>Operations Hub | Fahel &amp; Co.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#F1F5EF; --surface:#FFFFFF; --raised:#F7FAF6; --line:#E4E9E1; --line-2:#D3DACF;
+  --ink:#12150F; --ink-2:#5A6356; --ink-3:#8B948A;
+  --accent:#9FCE88; --accent-soft:#E7F1DD; --accent-line:#CBE0B7; --accent-deep:#4A7C3F;
+  --btn:#12150F; --btn-ink:#FFFFFF; --bad:#A82D22; --bad-soft:#FBEDEC; --warn:#B8860B; --warn-soft:#FDF4E7;
+  --shadow:0 1px 2px rgba(18,21,15,.04); --r:11px; --r-s:6px;
+  --s-diary:#2F6FB2; --s-ops:#3E9B4F; --s-cycle:#B8860B; --s-master:#7A4FB0; --s-projects:#0F8A8A; --s-deadlines:#A82D22; --s-mine:#5A6356;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px;border-radius:4px}
+.num{font-variant-numeric:tabular-nums}
+
+/* gate */
+#gate{position:fixed;inset:0;display:grid;place-items:center;background:var(--ground);z-index:60;padding:24px}
+.gate-card{width:min(390px,100%);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:34px;box-shadow:var(--shadow)}
+.mark{display:flex;align-items:center;gap:11px;margin-bottom:28px}
+.mark-badge{width:36px;height:36px;border-radius:var(--r-s);background:var(--btn);color:var(--btn-ink);display:grid;place-items:center;font-weight:700;font-size:13px}
+.mark-name{font-weight:700;font-size:14px;letter-spacing:-.01em}
+.mark-sub{font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.gate-card h1{font-size:23px;font-weight:700;letter-spacing:-.03em;margin-bottom:7px}
+.gate-card p{color:var(--ink-2);font-size:13.5px;margin:0 0 22px}
+#gate-err{color:var(--bad);font-size:12.5px;min-height:17px;margin-top:11px;text-align:center}
+
+/* shell */
+#app{display:none;max-width:1180px;margin:0 auto;padding:30px max(16px,env(safe-area-inset-right,0px)) 90px max(16px,env(safe-area-inset-left,0px))}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.topbar h1{font-size:36px;font-weight:700;letter-spacing:-.038em;line-height:1.05;margin-top:6px}
+.lede{font-size:14.5px;color:var(--ink-2);margin-top:8px;max-width:66ch}
+.tb-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.tb-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.ghost{font-size:13px;color:var(--ink-2);border:1px solid var(--line-2);border-radius:var(--r-s);padding:6px 12px;background:var(--surface);text-decoration:none;display:inline-block}
+.ghost:hover{border-color:var(--accent-deep);color:var(--accent-deep)}
+.ghost[disabled]{opacity:.5;cursor:progress}
+.stamp{font-size:12px;color:var(--ink-3);text-align:right;line-height:1.6}
+.stamp b{color:var(--ink);font-weight:600}
+.stale{color:var(--bad)!important}
+
+/* sections */
+.sec{margin-top:26px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.sec-h h2{font-size:19px;font-weight:700;letter-spacing:-.02em}
+.sec-h .hint{font-size:12.5px;color:var(--ink-3)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.pad{padding:18px 20px}
+
+/* today */
+.today-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+@media(max-width:820px){.today-grid{grid-template-columns:1fr}}
+.today-list{margin:0;padding:0;list-style:none;counter-reset:t}
+.today-list>li{counter-increment:t;display:grid;grid-template-columns:26px 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.today-list>li:first-child{border-top:0}
+.today-list>li::before{content:counter(t);width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent-deep);font-weight:700;font-size:12px;display:grid;place-items:center;margin-top:1px}
+.mini-h{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.strip-day{margin-bottom:12px}
+.strip-day:last-child{margin-bottom:0}
+.empty{color:var(--ink-3);font-size:13px}
+
+/* counts */
+.counts{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;margin-top:16px}
+.count{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-s);padding:10px 12px;text-decoration:none;display:block}
+.count:hover{border-color:var(--accent-deep)}
+.count b{display:block;font-size:22px;letter-spacing:-.03em;line-height:1.1}
+.count span{font-size:11.5px;color:var(--ink-2)}
+.count.hot b{color:var(--bad)}
+
+/* calendar */
+.cal-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);border-radius:100px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.chip[aria-pressed="false"]{opacity:.45}
+.nav{display:flex;gap:6px;align-items:center}
+.nav .lbl{font-weight:600;min-width:150px;text-align:center}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+@media(max-width:900px){.week{grid-template-columns:1fr}}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-s);min-height:120px;display:flex;flex-direction:column}
+.day.is-today{border-color:var(--accent-deep);box-shadow:0 0 0 1px var(--accent-deep) inset}
+.day.weekend{background:var(--raised)}
+.day-h{display:flex;justify-content:space-between;align-items:center;padding:7px 9px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink-2)}
+.day-h .plus{border:0;background:none;color:var(--ink-3);font-size:18px;line-height:1;padding:0 4px}
+.day-h .plus:hover{color:var(--accent-deep)}
+.day-b{padding:6px;display:flex;flex-direction:column;gap:5px}
+.ev{display:block;width:100%;text-align:left;border:0;border-left:3px solid var(--c);background:var(--raised);border-radius:4px;padding:4px 7px;font-size:12px;line-height:1.35;color:var(--ink)}
+.ev:hover{background:var(--accent-soft)}
+.ev .t{color:var(--ink-3);font-size:11px;display:block}
+.ev.done{opacity:.5;text-decoration:line-through}
+.ev.flag{background:var(--bad-soft)}
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:10px}
+.month .dow{font-size:11px;color:var(--ink-3);text-align:center;font-weight:600}
+.mcell{background:var(--surface);border:1px solid var(--line);border-radius:4px;min-height:74px;padding:4px;font-size:11px;overflow:hidden}
+.mcell.out{opacity:.4}
+.mcell.is-today{border-color:var(--accent-deep)}
+.mcell .n{font-weight:700;color:var(--ink-2);display:flex;justify-content:space-between}
+.mcell .m{display:block;width:100%;text-align:left;border:0;background:none;padding:1px 0 1px 5px;border-left:2px solid var(--c);margin-top:2px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:620px){.mcell{min-height:48px}.mcell .m{font-size:0;height:6px;padding:0;margin-top:2px;border-left-width:0;background:var(--c);border-radius:2px}}
+
+/* folds */
+details.fold{margin-top:8px}
+details.fold>summary{list-style:none;cursor:pointer;color:var(--accent-deep);font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+details.fold[open]>summary::before{transform:rotate(45deg)}
+
+/* brief cards */
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:820px){.cards{grid-template-columns:1fr}}
+.bcard{border-left:4px solid var(--accent-deep)}
+.bcard.hot{border-left-color:var(--bad)}
+.bcard h3{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;display:flex;justify-content:space-between;gap:8px}
+.bcard h3 .ct{color:var(--ink-3);letter-spacing:0}
+.bcard .sum{margin-top:6px;color:var(--ink)}
+.rows{list-style:none;margin:8px 0 0;padding:0}
+.rows>li{border-top:1px solid var(--line);padding:9px 0}
+.rows .rt{font-weight:600}
+.rows .rd{color:var(--ink-2);font-size:13px;margin-top:2px}
+.rows .meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:5px;font-size:12px;color:var(--ink-3)}
+.pill{display:inline-block;border-radius:100px;padding:1px 8px;font-size:11.5px;font-weight:600;background:var(--raised);color:var(--ink-2);border:1px solid var(--line)}
+.pill.bad{background:var(--bad-soft);color:var(--bad);border-color:#F1CFCB}
+.pill.warn{background:var(--warn-soft);color:var(--warn);border-color:#F2DDB5}
+.pill.ok{background:var(--accent-soft);color:var(--accent-deep);border-color:var(--accent-line)}
+.pill.prog{background:#E8F0FA;color:#2F6FB2;border-color:#C9DCF1}
+.lastnote{font-size:12.5px;color:var(--ink-2);margin-top:5px;padding:5px 9px;border-left:3px solid var(--line-2);background:var(--raised);border-radius:0 var(--r-s) var(--r-s) 0}
+.lastnote b{font-weight:600;color:var(--ink-3);font-size:11.5px;margin-right:4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.seg label{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line-2);border-radius:100px;padding:4px 11px;font-size:13px;cursor:pointer;background:var(--surface)}
+.dr .seg input{width:auto;margin:0;padding:0;accent-color:var(--accent-deep)}
+.seg label{white-space:nowrap}
+.seg label:has(input:checked){border-color:var(--accent-deep);background:var(--accent-soft);color:var(--accent-deep);font-weight:600}
+.dr .lbl{font-size:12px;font-weight:600;color:var(--ink-3);margin-top:14px;text-transform:uppercase;letter-spacing:.04em}
+.dr .quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.dr .quick button{font-size:12px;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r-s);padding:3px 9px;color:var(--ink-2)}
+.dr .log{list-style:none;margin:6px 0 0;padding:0}
+.dr .log li{font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line)}
+.dr .log li .w{color:var(--ink-3);font-size:11.5px}
+.dr .log li button{border:0;background:none;color:var(--ink-3);font-size:11.5px;text-decoration:underline;cursor:pointer;padding:0 0 0 6px}
+.act{display:inline-flex;gap:6px;margin-left:auto}
+.act button,.act a{font-size:12px;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r-s);padding:2px 9px;color:var(--ink-2);text-decoration:none}
+.act button:hover,.act a:hover{border-color:var(--accent-deep);color:var(--accent-deep)}
+
+/* drawer */
+#drawer{position:fixed;inset:0;background:rgba(18,21,15,.28);display:none;z-index:50;align-items:flex-end;justify-content:center}
+#drawer.on{display:flex}
+.dr{background:var(--surface);width:min(560px,100%);border-radius:var(--r) var(--r) 0 0;padding:20px;max-height:85vh;overflow:auto}
+@media(min-width:700px){#drawer{align-items:center}.dr{border-radius:var(--r)}}
+.dr h3{font-size:18px;margin-bottom:6px}
+.dr .kv{font-size:13px;color:var(--ink-2);margin:3px 0}
+.dr .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.dr input,.dr textarea{width:100%;font:inherit;border:1px solid var(--line-2);border-radius:var(--r-s);padding:8px 10px;margin-top:6px;background:var(--surface);color:var(--ink)}
+.solid{background:var(--btn);color:var(--btn-ink);border:0;border-radius:var(--r-s);padding:7px 14px;font-weight:600;font-size:13px}
+.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.links a{display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-s);padding:10px 12px;text-decoration:none}
+.links a:hover{border-color:var(--accent-deep)}
+.links a b{display:block;font-size:13.5px}
+.links a span{font-size:12px;color:var(--ink-3)}
+.err{background:var(--bad-soft);color:var(--bad);border-radius:var(--r-s);padding:8px 12px;font-size:13px;margin-top:10px}
+.note{font-size:12.5px;color:var(--ink-3);margin-top:8px}
+/* drag and drop on the calendar */
+[draggable="true"]{cursor:grab}
+.dragging{opacity:.45}
+.drop-on{outline:2px dashed var(--accent-deep);outline-offset:-2px;background:var(--accent-soft, rgba(47,93,58,.08))}
+</style>
+</head>
+<body>
+<div id="gate">
+  <form class="gate-card" id="gate-form">
+    <div class="mark"><div class="mark-badge">F&amp;C</div><div><div class="mark-name">Fahel &amp; Co.</div><div class="mark-sub">Staff</div></div></div>
+    <h1>Operations Hub</h1>
+    <p>Sign in with your fahelandco.com Google account.</p>
+    <div id="gate-err"></div>
+  </form>
+</div>
+
+<div id="app">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">Operations Hub</div>
+      <h1 id="hello">Good morning</h1>
+      <div class="lede" id="headline">Your calendar, the morning brief in full, and the leases waiting on your signature.</div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-actions">
+        <a class="ghost" href="https://staff.fahelandco.com/">Staff home</a>
+        <a class="ghost" href="https://claude.ai/artifact/XLqfBzeYscmmKgJLvWUeRv" target="_blank" rel="noopener">Resources &amp; FAQs</a>
+        <button class="ghost" id="refresh">Refresh</button>
+        <button class="ghost" id="signout">Sign out</button>
+      </div>
+      <div class="stamp" id="stamp"></div>
+    </div>
+  </header>
+
+  <section class="sec" id="today-sec">
+    <div class="today-grid">
+      <div class="card pad">
+        <p class="mini-h">Today, if nothing else</p>
+        <ol class="today-list" id="today-list"></ol>
+      </div>
+      <div class="card pad">
+        <p class="mini-h">Today and tomorrow</p>
+        <div id="strip"></div>
+      </div>
+    </div>
+    <div class="counts" id="counts"></div>
+  </section>
+
+  <section class="sec" id="cal-sec">
+    <div class="sec-h"><h2>Calendar</h2><span class="hint" id="cal-hint"></span></div>
+    <div class="cal-bar">
+      <div class="chips" id="chips"></div>
+      <div class="nav">
+        <button class="ghost" id="prev" aria-label="Previous week">&#8249;</button>
+        <span class="lbl" id="week-lbl"></span>
+        <button class="ghost" id="next" aria-label="Next week">&#8250;</button>
+        <button class="ghost" id="this-week">This week</button>
+      </div>
+    </div>
+    <div class="week" id="week"></div>
+    <details class="fold" id="month-fold"><summary id="month-sum">Show the month</summary><div class="month" id="month"></div></details>
+    <details class="fold"><summary id="cycle-sum">Show the Late Rent cycle</summary><div class="card pad" style="margin-top:8px"><ul class="rows" id="cycle"></ul></div></details>
+    <details class="fold"><summary id="done-sum">Show completed items</summary><div class="card pad" style="margin-top:8px"><ul class="rows" id="done-list"></ul></div></details>
+    <p class="note">Drag a brief row, a monday row or one of your own items onto another day to move it. Google Calendar events move in Google Calendar. Moving a monday row changes the date on the hub only.</p>
+    <div id="cal-err"></div>
+  </section>
+
+  <section class="sec" id="brief-sec">
+    <div class="sec-h"><h2>Morning brief</h2><span class="hint" id="brief-hint"></span></div>
+    <div class="cards" id="cards"></div>
+    <div id="health"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><h2>Links</h2></div>
+    <div class="links" id="links"></div>
+  </section>
+</div>
+
+<div id="drawer" role="dialog" aria-modal="true"><div class="dr" id="dr"></div></div>
+
+<script src="/gate.js"></script>
+<script>
+(() => {
+  const TZ = "America/Toronto";
+  const STREAMS = [
+    ["diary", "My calendar"], ["ops", "Operations calendar"], ["cycle", "Late Rent cycle"], ["master", "Master Ops Calendar"],
+    ["projects", "Projects"], ["deadlines", "Deadlines from the brief"], ["mine", "My items"],
+  ];
+  const SECTIONS = [
+    ["carlton", "Carlton West"], ["clients", "Clients"], ["rami", "Assigned by Rami"], ["kailon", "Assigned by Kailon"],
+    ["urgent", "Urgent from the dashboard"], ["laterent", "Late Rent, intake to move-out arrears"], ["onoff", "Onboarding and offboarding"],
+    ["tosign", "Leases to sign"], ["waiting", "Waiting on you"],
+  ];
+  const HOT = new Set(["urgent", "rami"]);
+  const LINKS = [
+    ["Operations - Resources & FAQs", "How-tos, LTB forms, rooming licences, utilities, insurance. Searchable.", "https://claude.ai/artifact/XLqfBzeYscmmKgJLvWUeRv"],
+    ["Leases, Move-Ins and Rent Roll Audit dashboard", "Urgent issues, unit checks, N8 flags", "https://script.google.com/a/macros/fahelandco.com/s/AKfycbwWSkiLnKLhEnzQQt2HjQtWmwG3gD01VqcvlyhNCQzo2yOunlCB0iLEdVWH95E3kxFHyA/exec"],
+    ["Operations meeting notes", "Kailon's running action list", "https://docs.google.com/document/d/1vj-Qxj2542bUNMRszSxNw9PgUi6hr2YxhhS5jBtEgUM/edit"],
+    ["Late Rent Cycle Tracker", "monday, this month's 25 steps", "https://fahel.monday.com/boards/18423960533"],
+    ["Master Operations Calendar", "monday, dated monthly work", "https://fahel.monday.com/boards/18421422068"],
+    ["Late Rent Escalation (N4/L1)", "monday", "https://fahel.monday.com/boards/18422886311"],
+    ["LTB Filings", "monday", "https://fahel.monday.com/boards/18422888441"],
+    ["Move-Out Arrears", "monday, abandonment and FrontLobby", "https://fahel.monday.com/boards/18436062823"],
+    ["Client Onboarding", "monday", "https://fahel.monday.com/boards/553190946"],
+    ["Client Offboarding", "monday", "https://fahel.monday.com/boards/4424443037"],
+    ["MASTER Project Tracker", "monday, your projects", "https://fahel.monday.com/boards/18403725633"],
+    ["E-Transfer Log", "Google Sheets, deposits by property", "https://docs.google.com/spreadsheets/d/1sUwN8niHnfVyyxuIVpe-o3DUNiivoZtWrbMTSNLUHtI/edit"],
+    ["Gmail: To Sign", "Leases and documents waiting on your signature", "https://mail.google.com/mail/u/?authuser=ethan@fahelandco.com#label/To+Sign"],
+    ["Gmail: To Review", "Copied for information, no action needed", "https://mail.google.com/mail/u/?authuser=ethan@fahelandco.com#label/To+Review"],
+  ];
+
+  let D = null;
+  const st = { weekStart: null, on: new Set(STREAMS.map(s => s[0])) };
+  try { const saved = JSON.parse(localStorage.getItem("eh_streams") || "null"); if (Array.isArray(saved)) st.on = new Set(saved); } catch (_) {}
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const ymdTZ = d => d.toLocaleDateString("en-CA", { timeZone: TZ });
+  const today = () => ymdTZ(new Date());
+  const parseYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(Date.UTC(y, m - 1, d, 12)); };
+  const addDays = (s, n) => { const d = parseYmd(s); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const dow = s => parseYmd(s).getUTCDay();
+  const mondayOf = s => addDays(s, -((dow(s) + 6) % 7));
+  const fmtDay = s => parseYmd(s).toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+  const fmtLong = s => parseYmd(s).toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" });
+  const fmtTime = iso => new Date(iso).toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit", timeZone: TZ }).replace(":00", "").replace(" a.m.", "am").replace(" p.m.", "pm");
+  const ago = iso => { if (!iso) return "never"; const m = Math.round((Date.now() - Date.parse(iso)) / 60000); if (m < 60) return m + " min ago"; const h = Math.round(m / 60); if (h < 36) return h + " h ago"; return Math.round(h / 24) + " days ago"; };
+  const mark = id => (D?.marks || {})[id];
+  // To-do state on a brief row: status (open, inprogress, deferred, done, dismissed), a moved date, and a notes log.
+  const todo = id => mark(id) || {};
+  const effDue = it => todo(it.id).due || it.due || null;
+  const isClosed = id => ["done", "dismissed"].includes(todo(id).status);
+  const who = e => String(e || "").split("@")[0].replace(/^./, c => c.toUpperCase());
+  const whenShort = iso => new Date(iso).toLocaleString("en-CA", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const ITEMS = () => { const m = {}; for (const sec of D?.brief?.sections || []) for (const it of sec.items) m[it.id] = { it, sec }; return m; };
+  const cssVar = k => `var(--s-${k})`;
+
+  async function post(body) {
+    const r = await fetch("/api/items", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then(x => x.json());
+    if (r.error) { alert(r.error); return null; }
+    if (r.marks) D.marks = r.marks;
+    if (r.diary) D.diary = r.diary;
+    render();
+    return r;
+  }
+
+  // Everything that can sit on a day, from every source, in one shape.
+  function entries() {
+    const out = [];
+    for (const e of D.calendar?.events || []) {
+      const allDay = e.allDay || /^\d{4}-\d{2}-\d{2}$/.test(e.start);
+      const date = allDay ? e.start.slice(0, 10) : ymdTZ(new Date(e.start));
+      if (allDay && e.end && e.end.slice(0, 10) > addDays(date, 1)) {
+        for (let d = date; d < e.end.slice(0, 10); d = addDays(d, 1)) out.push({ id: e.id + "@" + d, stream: e.cal, date: d, title: e.title, time: "All day", link: e.link, sub: e.location, needsAction: e.needsAction, kind: "event" });
+      } else out.push({ id: e.id, stream: e.cal, date, title: e.title, time: allDay ? "All day" : fmtTime(e.start), sort: allDay ? "" : e.start, link: e.link, sub: e.location, needsAction: e.needsAction, kind: "event" });
+    }
+    const A = D.agenda || {};
+    for (const m of A.master || []) if (m.date) out.push({ id: m.id, stream: "master", date: m.date, title: m.title, sub: [m.who, m.timing].filter(Boolean).join(", "), status: m.status, done: m.done, link: m.link, mine: m.mine });
+    for (const c of A.cycle?.steps || []) if (c.date) out.push({ id: c.id, stream: "cycle", date: c.date, title: `${c.n}. ${c.title}`, sub: [c.who, c.timing].filter(Boolean).join(", "), status: c.status, done: c.done, link: c.link, mine: c.mine });
+    for (const p of A.projects || []) if (p.date && !p.done) out.push({ id: p.id, stream: "projects", date: p.date, title: p.title, sub: ["Project due", p.priority, p.status].filter(Boolean).join(", "), status: p.status, link: p.link });
+    const norm = s => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const seen = new Set(out.map(e => e.date + "|" + norm(e.title)));
+    for (const sec of D.brief?.sections || []) for (const it of sec.items) { const due = effDue(it); if (due && (todo(it.id).due || !seen.has(due + "|" + norm(it.title)))) out.push({ id: it.id, stream: "deadlines", date: due, title: it.title, sub: [sec.title, it.who].filter(Boolean).join(", "), link: it.link, brief: true }); }
+    for (const d of D.diary || []) out.push({ id: d.id, stream: "mine", date: d.date, title: d.title, sub: d.note, done: d.done, diary: true });
+    for (const e of out) {
+      const mk = mark(e.id);
+      // A date moved on the hub (drag and drop or Update) wins over monday's date; monday itself is unchanged.
+      if (mk?.due && ["master", "cycle", "projects"].includes(e.stream)) { e.date = mk.due; e.moved = true; }
+      if (mk?.status === "done") e.done = true;
+      if (mk?.status === "dismissed") e.hidden = true;
+      if (!e.done && e.date < today() && ["deadlines", "projects", "cycle", "master"].includes(e.stream) && (e.mine !== false)) e.overdue = true;
+    }
+    return out.filter(e => !e.hidden);
+  }
+  const byDay = list => { const m = {}; for (const e of list) (m[e.date] ||= []).push(e); for (const k in m) m[k].sort((a, b) => (a.sort || "0").localeCompare(b.sort || "0") || STREAMS.findIndex(s => s[0] === a.stream) - STREAMS.findIndex(s => s[0] === b.stream)); return m; };
+
+  function evBtn(e, cls = "ev") {
+    const flag = e.overdue || e.needsAction;
+    const drag = e.kind !== "event" && !e.done;
+    return `<button class="${cls}${e.done ? " done" : ""}${flag && cls === "ev" ? " flag" : ""}" style="--c:${cssVar(e.stream)}" data-ev="${esc(e.id)}"${drag ? ` draggable="true" data-drag="${esc(e.id)}"` : ""} title="${esc(e.title)}${drag ? " (drag to another day to move it)" : ""}">${cls === "ev" && e.time ? `<span class="t">${esc(e.time)}${e.needsAction ? ", reply owed" : ""}</span>` : ""}${cls === "ev" && e.overdue ? `<span class="t" style="color:var(--bad)">Overdue</span>` : ""}${esc(e.title)}</button>`;
+  }
+
+  function renderCalendar(all) {
+    const list = all.filter(e => st.on.has(e.stream));
+    const days = byDay(list), t = today();
+    $("chips").innerHTML = STREAMS.map(([k, l]) => `<button class="chip" data-stream="${k}" aria-pressed="${st.on.has(k)}"><i style="background:${cssVar(k)}"></i>${l}</button>`).join("");
+    const ws = st.weekStart;
+    $("week-lbl").textContent = `${fmtDay(ws)} to ${fmtDay(addDays(ws, 6))}`;
+    let h = "";
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(ws, i), evs = days[d] || [];
+      h += `<div data-drop="${d}" class="day${d === t ? " is-today" : ""}${[0, 6].includes(dow(d)) ? " weekend" : ""}"><div class="day-h"><span>${fmtDay(d)}</span><button class="plus" data-add="${d}" aria-label="Add an item on ${fmtDay(d)}">+</button></div><div class="day-b">${evs.map(e => evBtn(e)).join("") || `<span class="empty">Nothing</span>`}</div></div>`;
+    }
+    $("week").innerHTML = h;
+
+    // Month grid around the week shown.
+    const first = ws.slice(0, 8) + "01";
+    const mStart = mondayOf(first);
+    const monthName = parseYmd(first).toLocaleDateString("en-CA", { month: "long", year: "numeric", timeZone: "UTC" });
+    $("month-sum").textContent = `Show ${monthName}`;
+    let m = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(x => `<div class="dow">${x}</div>`).join("");
+    for (let i = 0; i < 42; i++) {
+      const d = addDays(mStart, i);
+      if (i >= 35 && d.slice(5, 7) !== first.slice(5, 7)) break;
+      const evs = days[d] || [];
+      m += `<div data-drop="${d}" class="mcell${d.slice(5, 7) !== first.slice(5, 7) ? " out" : ""}${d === t ? " is-today" : ""}"><div class="n"><span>${Number(d.slice(8))}</span><button class="plus" style="border:0;background:none;color:var(--ink-3)" data-add="${d}" aria-label="Add">+</button></div>${evs.slice(0, 4).map(e => evBtn(e, "m")).join("")}${evs.length > 4 ? `<div style="color:var(--ink-3)">+${evs.length - 4} more</div>` : ""}</div>`;
+    }
+    $("month").innerHTML = m;
+
+    // Today and tomorrow strip.
+    const strip = [t, addDays(t, 1)].map(d => {
+      const evs = (byDay(all)[d] || []).filter(e => !e.done);
+      return `<div class="strip-day"><div class="mini-h" style="margin-bottom:4px">${d === t ? "Today" : "Tomorrow"}, ${fmtDay(d)}</div><div class="day-b" style="padding:0">${evs.map(e => evBtn(e)).join("") || `<span class="empty">Nothing scheduled</span>`}</div></div>`;
+    }).join("");
+    $("strip").innerHTML = strip;
+
+    // Late Rent cycle, every step including the ones with no fixed day.
+    const cyc = D.agenda?.cycle || {};
+    const steps = cyc.steps || [];
+    $("cycle-sum").textContent = cyc.missing ? "Late Rent cycle: no group for this month yet" : `Show the Late Rent cycle, ${cyc.month}: ${cyc.done || 0} of ${cyc.total || 0} done`;
+    $("cycle").innerHTML = steps.map(s => `<li><div class="rt">${s.n}. ${esc(s.title)}</div><div class="meta"><span class="pill${s.done ? " ok" : s.date && s.date < today() ? " bad" : ""}">${esc(s.status || "Not started")}</span><span>${esc(s.who)}</span><span>${esc(s.timing)}</span><span class="act"><a href="${esc(s.link)}" target="_blank" rel="noopener">Open in monday</a></span></div></li>`).join("") || `<li class="empty">No steps found.</li>`;
+
+    // Completed items (my items and anything ticked on the hub).
+    const done = all.filter(e => e.done && (e.diary || mark(e.id)?.status === "done"));
+    $("done-sum").textContent = `Show completed items (${done.length})`;
+    $("done-list").innerHTML = done.map(e => { const d = (D.diary || []).find(x => x.id === e.id); const mk = mark(e.id); const when = d?.doneAt || mk?.at; return `<li><div class="rt">${esc(e.title)}</div><div class="meta"><span>${fmtDay(e.date)}</span>${e.sub ? `<span>${esc(e.sub)}</span>` : ""}${when ? `<span>Completed ${new Date(when).toLocaleDateString("en-CA", { timeZone: TZ })}</span>` : ""}<span class="act"><button data-reopen="${esc(e.id)}">Reopen</button></span></div></li>`; }).join("") || `<li class="empty">Nothing completed yet.</li>`;
+
+    const errs = [...(D.agenda?.errors || []), ...(D.calendar?.errors || [])];
+    $("cal-err").innerHTML = errs.length ? `<div class="err">Some calendar sources could not be read: ${errs.map(esc).join("; ")}</div>` : "";
+    const calAt = D.calendar?.at;
+    $("cal-hint").innerHTML = `Google Calendar synced ${calAt ? `<span class="${Date.now() - Date.parse(calAt) > 3 * 3600e3 ? "stale" : ""}">${ago(calAt)}</span>` : `<span class="stale">not yet</span>`}, monday ${ago(D.agenda?.at)}`;
+  }
+
+  function signingRows() {
+    const items = Object.values(D.signing?.items || {}).filter(x => x.status === "open" && mark(`sign-${x.key}`)?.status !== "dismissed" && mark(`sign-${x.key}`)?.status !== "done");
+    return items.sort((a, b) => String(a.firstSeen).localeCompare(String(b.firstSeen)));
+  }
+  const depPill = dep => {
+    if (!dep) return `<span class="pill">Deposit not checked</span>`;
+    const m = { found: ["ok", "Deposit in"], possible: ["warn", "Possible deposit"], none: ["bad", "No deposit found"], unknown: ["", "Deposit unknown"] }[dep.status] || ["", "Deposit unknown"];
+    return `<span class="pill ${m[0]}">${m[1]}</span>`;
+  };
+
+  const stPill = (t, due) => t.status === "inprogress" ? `<span class="pill prog">In progress</span>`
+    : t.status === "deferred" ? `<span class="pill warn">Deferred${due ? ` to ${fmtDay(due)}` : ""}</span>` : "";
+
+  function rowHtml(sec, it) {
+    const t = todo(it.id), due = effDue(it);
+    const overdue = due && due < today();
+    const moved = t.due && it.due && t.due !== it.due;
+    const notes = t.notes || [], last = notes[notes.length - 1];
+    const duePill = due && (t.status !== "deferred" || overdue) ? `<span class="pill${overdue ? " bad" : ""}">${overdue ? "Overdue, was due" : "Due"} ${fmtDay(due)}${moved ? `, moved from ${fmtDay(it.due)}` : ""}</span>` : "";
+    return `<li><div class="rt">${it.urgent ? `<span class="pill bad">Urgent</span> ` : ""}${stPill(t, due)}${t.status ? " " : ""}${esc(it.title)}</div>${it.detail ? `<div class="rd">${esc(it.detail)}</div>` : ""}${last ? `<div class="lastnote"><b>${esc(who(last.by))}, ${esc(whenShort(last.at))}${notes.length > 1 ? `, ${notes.length} notes` : ""}:</b>${esc(last.text)}</div>` : ""}<div class="meta">${it.who ? `<span>${esc(it.who)}</span>` : ""}${duePill}${it.deposit ? `<span>${esc(it.deposit)}</span>` : ""}${it.source ? `<span>${esc(it.source)}</span>` : ""}<span class="act">${it.link ? `<a href="${esc(it.link)}" target="_blank" rel="noopener">${esc(it.linkLabel || "Open")}</a>` : ""}${t.status === "inprogress" ? "" : `<button data-upd="${esc(it.id)}" data-st="inprogress">Start</button>`}<button data-upd="${esc(it.id)}" data-st="done">Done</button><button data-edit="${esc(it.id)}">Update</button></span></div></li>`;
+  }
+
+  // Order inside a card: in progress, then open, then deferred (soonest first); due date breaks ties.
+  const RANK = { inprogress: 0, undefined: 1, deferred: 2 };
+  const sortRows = rows => rows.slice().sort((a, b) => (RANK[todo(a.id).status] ?? 1) - (RANK[todo(b.id).status] ?? 1) || String(effDue(a) || "9999").localeCompare(String(effDue(b) || "9999")));
+
+  // The editor: status, date, a note, and the log of notes and changes.
+  function editItem(id) {
+    const ref = ITEMS()[id];
+    const it = ref?.it || { id, title: (entries().find(x => x.id === id) || {}).title || "Item" };
+    const t = todo(id), due = effDue(it), cur = t.status || "open";
+    const opts = [["open", "Open"], ["inprogress", "In progress"], ["deferred", "Deferred"], ["done", "Done"]];
+    const notes = (t.notes || []).slice().reverse(), hist = (t.history || []).slice().reverse();
+    openDrawer(`<div class="eyebrow">${esc(ref?.sec?.title || "To do")}</div><h3>${esc(it.title)}</h3>
+      ${it.detail ? `<div class="kv">${esc(it.detail)}</div>` : ""}${it.who ? `<div class="kv">${esc(it.who)}${it.source ? `, ${esc(it.source)}` : ""}</div>` : ""}
+      <form id="todo-form">
+        <div class="lbl">Status</div><div class="seg">${opts.map(([v, l]) => `<label><input type="radio" name="status" value="${v}"${v === cur ? " checked" : ""}>${l}</label>`).join("")}</div>
+        <div class="lbl">Date</div><input type="date" name="due" value="${esc(due || "")}">
+        <div class="quick">${[["Tomorrow", 1], ["In 3 days", 3], ["Next week", 7], ["In 2 weeks", 14]].map(([l, n]) => `<button type="button" data-qd="${n}">${l}</button>`).join("")}<button type="button" data-qd="clear">${it.due ? "Back to the brief's date" : "No date"}</button></div>
+        ${it.due ? `<div class="note">The brief's date was ${fmtDay(it.due)}. A new date moves it on your calendar; deferring with a date hides the overdue flag until then.</div>` : `<div class="note">A date puts it on your calendar under Deadlines.</div>`}
+        <div class="lbl">Add a note</div><textarea name="note" rows="3" maxlength="1000" placeholder="What happened, who you spoke to, what is next"></textarea>
+        <div class="btns"><button class="solid" type="submit">Save</button>${it.link ? `<a class="ghost" href="${esc(it.link)}" target="_blank" rel="noopener">${esc(it.linkLabel || "Open")}</a>` : ""}<button class="ghost" type="button" data-hide="${esc(id)}">Hide from the hub</button><button class="ghost" type="button" data-close>Close</button></div>
+      </form>
+      ${notes.length ? `<div class="lbl">Notes (${notes.length})</div><ul class="log">${notes.map(n => `<li>${esc(n.text)}<div class="w">${esc(who(n.by))}, ${esc(whenShort(n.at))}${n.by === D.me ? `<button data-delnote="${esc(n.at)}" data-id="${esc(id)}">Delete</button>` : ""}</div></li>`).join("")}</ul>` : ""}
+      ${hist.length ? `<details class="fold"><summary>Show the ${hist.length} change${hist.length > 1 ? "s" : ""}</summary><ul class="log">${hist.map(h => `<li>${esc(h.what)}<div class="w">${esc(who(h.by))}, ${esc(whenShort(h.at))}</div></li>`).join("")}</ul></details>` : ""}`);
+    const f = $("todo-form");
+    f.querySelectorAll("[data-qd]").forEach(b => b.onclick = () => { f.due.value = b.dataset.qd === "clear" ? (it.due || "") : addDays(today(), Number(b.dataset.qd)); });
+    f.addEventListener("submit", async ev => {
+      ev.preventDefault();
+      const body = { op: "update", id };
+      const status = f.status.value;
+      if (status !== cur) body.status = status;
+      const newDue = f.due.value || "";
+      if (newDue !== (due || "")) body.due = newDue && newDue === it.due ? "" : newDue; // back to the brief's own date clears the override
+      if (status === "deferred" && !newDue) { alert("Pick the date to defer it to."); return; }
+      if (f.note.value.trim()) body.note = f.note.value.trim();
+      if (Object.keys(body).length === 2) return closeDrawer();
+      const r = await post(body); if (r) closeDrawer();
+    });
+  }
+
+  function renderBrief() {
+    const B = D.brief;
+    const t = today();
+    if (!B) { $("cards").innerHTML = `<div class="card pad empty">No brief has been posted yet. The morning brief runs at 8:00 on weekdays.</div>`; $("today-list").innerHTML = `<li>No brief yet today.</li>`; return {}; }
+    const staleBrief = B.date !== t;
+    $("brief-hint").innerHTML = `Built ${new Date(B.generatedAt).toLocaleString("en-CA", { timeZone: TZ, weekday: "short", hour: "numeric", minute: "2-digit" })}${staleBrief ? ` <span class="stale">, not today's</span>` : ""}`;
+    $("headline").textContent = B.headline || $("headline").textContent;
+    $("today-list").innerHTML = (B.today || []).map(x => `<li>${esc(x)}</li>`).join("") || `<li>Nothing pressing.</li>`;
+    const counts = {};
+    const bykey = Object.fromEntries((B.sections || []).map(s => [s.key, s]));
+    $("cards").innerHTML = SECTIONS.map(([k, title]) => {
+      if (k === "tosign") {
+        const rows = signingRows();
+        counts[k] = rows.length;
+        const sec = bykey[k];
+        const noDep = rows.filter(r => r.deposit?.status === "none").length;
+        const sum = sec?.summary || (rows.length ? `${rows.length} waiting on your signature${noDep ? `, ${noDep} with no deposit found yet` : ""}.` : "Nothing waiting on your signature.");
+        const lis = rows.map(r => `<li><div class="rt">${esc(r.property || r.doc || r.subject)}${r.unit ? ` ${esc(r.unit)}` : ""}</div><div class="rd">${esc(r.kind === "docusign" ? "DocuSign" : "Buildium")}: ${esc(r.doc || r.subject)}${r.reminders ? `, ${r.reminders} reminder${r.reminders > 1 ? "s" : ""}` : ""}</div><div class="meta">${depPill(r.deposit)}${r.deposit?.note ? `<span>${esc(r.deposit.note)}</span>` : ""}<span>Since ${r.firstSeen ? fmtDay(ymdTZ(new Date(r.firstSeen))) : "?"}</span><span class="act">${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">Open email</a>` : ""}<button data-mark="sign-${esc(r.key)}" data-st="done">Signed</button><button data-mark="sign-${esc(r.key)}" data-st="dismissed">Hide</button></span></div>${r.deposit?.matches?.length ? `<details class="fold"><summary>Show the ${r.deposit.matches.length} e-transfer${r.deposit.matches.length > 1 ? "s" : ""}</summary><ul class="rows">${r.deposit.matches.map(m => `<li class="rd">${esc(m.date)} ${esc(m.name)} $${Number(m.amount).toLocaleString("en-CA", { minimumFractionDigits: 2 })} ${esc(m.property)} ${esc(m.unit)} (${esc(m.tab)})</li>`).join("")}</ul></details>` : ""}</li>`).join("");
+        return `<article class="card pad bcard${noDep ? " hot" : ""}" id="sec-${k}"><h3>${title}<span class="ct">${rows.length}</span></h3><div class="sum">${esc(sum)}</div>${rows.length ? `<details class="fold"><summary>Show the ${rows.length}</summary><ul class="rows">${lis}</ul></details>` : ""}</article>`;
+      }
+      const sec = bykey[k];
+      const all = sec?.items || [];
+      const items = sortRows(all.filter(it => !isClosed(it.id)));
+      const done = all.filter(it => todo(it.id).status === "done");
+      const live = items.filter(it => todo(it.id).status !== "deferred" || (effDue(it) && effDue(it) <= t));
+      const prog = items.filter(it => todo(it.id).status === "inprogress").length, deferred = items.length - live.length;
+      counts[k] = live.length;
+      const sum = sec?.summary || "Nothing today.";
+      const extra = [prog ? `${prog} in progress` : "", deferred ? `${deferred} deferred` : ""].filter(Boolean).join(", ");
+      const doneFold = done.length ? `<details class="fold"><summary>Show the ${done.length} done</summary><ul class="rows">${done.map(it => { const d = todo(it.id); return `<li><div class="rt">${esc(it.title)}</div><div class="meta"><span>Done ${esc(whenShort(d.at))} by ${esc(who(d.by))}</span><span class="act"><button data-edit="${esc(it.id)}">Notes</button><button data-upd="${esc(it.id)}" data-st="open">Reopen</button></span></div></li>`; }).join("")}</ul></details>` : "";
+      return `<article class="card pad bcard${HOT.has(k) && live.length ? " hot" : ""}" id="sec-${k}"><h3>${esc(sec?.title || title)}<span class="ct">${live.length}</span></h3><div class="sum">${esc(sum)}${extra ? ` <span class="pill">${esc(extra)}</span>` : ""}</div>${items.length ? `<details class="fold"><summary>Show ${items.length === 1 ? "it" : items.length === 2 ? "both" : `the ${items.length}`}</summary><ul class="rows">${items.map(it => rowHtml(sec, it)).join("")}</ul></details>` : ""}${doneFold}</article>`;
+    }).join("");
+    $("health").innerHTML = (B.health || []).length ? `<div class="note">Sources: ${B.health.map(esc).join(" ")}</div>` : "";
+    return counts;
+  }
+
+  function render() {
+    if (!D) return;
+    const now = new Date();
+    const hr = Number(now.toLocaleString("en-CA", { hour: "numeric", hour12: false, timeZone: TZ }));
+    const name = /^ethan@/.test(D.me) ? ", Ethan" : "";
+    $("hello").textContent = `${hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening"}${name}`;
+    $("stamp").innerHTML = `<b>${fmtLong(today())}</b><br>Signed in as ${esc(D.me)}`;
+    const counts = renderBrief();
+    const all = entries();
+    renderCalendar(all);
+    const overdue = all.filter(e => e.overdue && st.on.has(e.stream)).length;
+    const tiles = [["tosign", "To sign"], ["rami", "From Rami"], ["kailon", "From Kailon"], ["clients", "Clients"], ["carlton", "Carlton West"], ["urgent", "Urgent"], ["waiting", "Waiting on you"]];
+    $("counts").innerHTML = tiles.map(([k, l]) => `<a class="count${HOT.has(k) && counts[k] ? " hot" : ""}" href="#sec-${k}"><b class="num">${counts[k] ?? 0}</b><span>${l}</span></a>`).join("") + `<a class="count${overdue ? " hot" : ""}" href="#cal-sec"><b class="num">${overdue}</b><span>Overdue on calendar</span></a>`;
+    $("links").innerHTML = LINKS.map(([t, s, u]) => `<a href="${u}" target="_blank" rel="noopener"><b>${esc(t)}</b><span>${esc(s)}</span></a>`).join("");
+  }
+
+  // Drawer: entry detail, or a new item form.
+  function openDrawer(html) { $("dr").innerHTML = html; $("drawer").classList.add("on"); }
+  function closeDrawer() { $("drawer").classList.remove("on"); }
+  $("drawer").addEventListener("click", e => { if (e.target.id === "drawer" || e.target.dataset.close != null) closeDrawer(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
+  function showEntry(id) {
+    const e = entries().find(x => x.id === id);
+    if (!e) return;
+    const label = (STREAMS.find(s => s[0] === e.stream) || [])[1];
+    const canTick = e.kind !== "event";
+    openDrawer(`<div class="eyebrow" style="color:${cssVar(e.stream)}">${esc(label)}</div><h3>${esc(e.title)}</h3>
+      <div class="kv">${fmtLong(e.date)}${e.time ? `, ${esc(e.time)}` : ""}</div>${e.sub ? `<div class="kv">${esc(e.sub)}</div>` : ""}${e.status ? `<div class="kv">monday status: ${esc(e.status)}</div>` : ""}
+      ${e.needsAction ? `<div class="kv" style="color:var(--bad)">You have not answered this invitation yet.</div>` : ""}${e.overdue ? `<div class="kv" style="color:var(--bad)">Past its date and not done.</div>` : ""}
+      ${e.stream === "master" || e.stream === "cycle" ? `<div class="note">Ticking it here only marks it on the hub. The monday status is changed on monday.</div>` : ""}
+      <div class="btns">${e.link ? `<a class="ghost" href="${esc(e.link)}" target="_blank" rel="noopener">Open</a>` : ""}
+      ${e.diary ? `<button class="solid" data-toggle="${esc(e.id)}">${e.done ? "Reopen" : "Mark complete"}</button><button class="ghost" data-del="${esc(e.id)}">Delete</button>` : canTick ? `<button class="solid" data-mark="${esc(e.id)}" data-st="${e.done ? "open" : "done"}">${e.done ? "Reopen" : "Mark done"}</button><button class="ghost" data-mark="${esc(e.id)}" data-st="dismissed">Hide from the hub</button>` : ""}
+      <button class="ghost" data-close>Close</button></div>`);
+  }
+  function addForm(date) {
+    openDrawer(`<div class="eyebrow">New item</div><h3>${fmtLong(date)}</h3><form id="add-form"><input name="title" placeholder="What needs doing" maxlength="200" required><textarea name="note" rows="3" placeholder="Note (optional)" maxlength="1000"></textarea><div class="btns"><button class="solid" type="submit">Add</button><button class="ghost" type="button" data-close>Cancel</button></div></form><div class="note">Items are shared with everyone on the hub.</div>`);
+    const f = $("add-form"); f.title.focus();
+    f.addEventListener("submit", async ev => { ev.preventDefault(); const r = await post({ op: "add", date, title: f.title.value, note: f.note.value }); if (r) closeDrawer(); });
+  }
+
+  document.addEventListener("click", async e => {
+    const t = e.target.closest("[data-ev],[data-add],[data-mark],[data-upd],[data-edit],[data-hide],[data-delnote],[data-toggle],[data-del],[data-stream],[data-reopen]");
+    if (!t) return;
+    if (t.dataset.ev) { const ev = entries().find(x => x.id === t.dataset.ev); return ev?.brief || ITEMS()[t.dataset.ev] ? editItem(t.dataset.ev) : showEntry(t.dataset.ev); }
+    if (t.dataset.add) return addForm(t.dataset.add);
+    if (t.dataset.stream) { const k = t.dataset.stream; st.on.has(k) ? st.on.delete(k) : st.on.add(k); try { localStorage.setItem("eh_streams", JSON.stringify([...st.on])); } catch (_) {} return render(); }
+    if (t.dataset.mark) { await post({ op: "mark", id: t.dataset.mark, status: t.dataset.st }); return closeDrawer(); }
+    if (t.dataset.upd) { await post({ op: "update", id: t.dataset.upd, status: t.dataset.st }); return; }
+    if (t.dataset.edit) return editItem(t.dataset.edit);
+    if (t.dataset.hide) { await post({ op: "update", id: t.dataset.hide, status: "dismissed" }); return closeDrawer(); }
+    if (t.dataset.delnote) { if (confirm("Delete this note?")) { await post({ op: "update", id: t.dataset.id, deleteNote: t.dataset.delnote }); editItem(t.dataset.id); } return; }
+    if (t.dataset.reopen) { const id = t.dataset.reopen; if ((D.diary || []).some(x => x.id === id)) await post({ op: "toggle", id }); else await post({ op: "mark", id, status: "open" }); return; }
+    if (t.dataset.toggle) { await post({ op: "toggle", id: t.dataset.toggle }); return closeDrawer(); }
+    if (t.dataset.del) { if (confirm("Delete this item?")) { await post({ op: "delete", id: t.dataset.del }); closeDrawer(); } }
+  });
+  // Drag and drop: drop a brief row, a monday row or one of your own items on another day to move it.
+  // Google Calendar events cannot be moved from here (change those in Google Calendar).
+  let dragId = null;
+  document.addEventListener("dragstart", e => { const t = e.target.closest?.("[data-drag]"); if (!t) return; dragId = t.dataset.drag; e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", dragId); } catch (_) {} t.classList.add("dragging"); });
+  document.addEventListener("dragend", () => { dragId = null; document.querySelectorAll(".dragging,.drop-on").forEach(x => x.classList.remove("dragging", "drop-on")); });
+  document.addEventListener("dragover", e => { if (!dragId) return; const c = e.target.closest?.("[data-drop]"); if (!c) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; document.querySelectorAll(".drop-on").forEach(x => x !== c && x.classList.remove("drop-on")); c.classList.add("drop-on"); });
+  document.addEventListener("drop", async e => {
+    const c = e.target.closest?.("[data-drop]"); if (!c || !dragId) return;
+    e.preventDefault();
+    const id = dragId, date = c.dataset.drop; dragId = null;
+    c.classList.remove("drop-on");
+    const ev = entries().find(x => x.id === id);
+    if (!ev || ev.date === date) return;
+    if (ev.diary) await post({ op: "move", id, date });
+    else await post({ op: "update", id, due: date });
+  });
+  $("prev").onclick = () => { st.weekStart = addDays(st.weekStart, -7); render(); };
+  $("next").onclick = () => { st.weekStart = addDays(st.weekStart, 7); render(); };
+  $("this-week").onclick = () => { st.weekStart = mondayOf(today()); render(); };
+  $("signout").onclick = () => FCGate.signOut();
+
+  async function load(refresh) {
+    const b = $("refresh"); b.disabled = true;
+    try {
+      const r = await fetch("/api/hub" + (refresh ? "?refresh=1" : ""));
+      const j = await r.json();
+      if (j.error) { if (r.status === 401) location.reload(); else document.getElementById("app").innerHTML = `<div class="err">${esc(j.error)}</div>`; return; }
+      D = j; render();
+    } catch (e) { $("cal-err").innerHTML = `<div class="err">Could not load the hub: ${esc(e.message)}</div>`; }
+    finally { b.disabled = false; }
+  }
+  $("refresh").onclick = () => load(true);
+
+  st.weekStart = mondayOf(today());
+  FCGate.start(() => { $("gate").style.display = "none"; $("app").style.display = "block"; load(false); setInterval(() => load(false), 10 * 60 * 1000); });
+})();
+</script>
+</body>
+</html>
